@@ -1,0 +1,17 @@
+{
+    "name": "belman",
+    "version": "1.0.0",
+    "description": "",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron .",
+        "browser": "browserify grafic.js -o graf.js"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "browserify": "^16.5.0",
+        "chart.js": "^2.9.3",
+        "electron": "^8.0.0"
+    }
+}
