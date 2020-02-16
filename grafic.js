@@ -6,16 +6,29 @@ drowChart = (labels, data) => {
     createDataset = (data) => {
         const dataset = [];
         data.forEach((element, index) => {
-            dataset.push(
-                {
-                    borderColor: `rgb(${index * 75}, ${index * 75}, ${index * 75})`,
+            if (index % 2 === 0) {
+                dataset.push({
+                    borderColor: `rgb(${index * 75}, ${index * 25}, ${index * 25})`,
                     fill: false,
                     data: element
                 });
+            } else if (index % 3 === 0) {
+                dataset.push({
+                    borderColor: `rgb(${index * 25}, ${index * 75}, ${index * 25})`,
+                    fill: false,
+                    data: element
+                });
+            } else {
+                dataset.push({
+                    borderColor: `rgb(${index * 25}, ${index * 25}, ${index * 75})`,
+                    fill: false,
+                    data: element
+            });
+            }
+            
         });
         return dataset;
     }
-    console.log(data);
     var chart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -23,12 +36,6 @@ drowChart = (labels, data) => {
             datasets: createDataset(data),
         },
         options: {
-            color: [
-                'red',    // color for data at index 0
-                'blue',   // color for data at index 1
-                'green',  // color for data at index 2
-                //...
-            ],
             responsive:false,
             legend: {
                 display: false,
@@ -36,8 +43,11 @@ drowChart = (labels, data) => {
         }
     });
 }
-input = document.createElement("input");
-input.type = "button";
-input.value = "Create Chart";
-input.addEventListener( "click" , () => drowChart([1,2,3], [[2,15,1], [1, 5, 2], [4, 6, 8]]));
-document.body.appendChild(input);
+drowButtonChart = () => {
+    input = document.createElement("input");
+    input.type = "button";
+    input.value = "Create Chart";
+    input.addEventListener( "click" , () => drowChart([1,2,3], [[2,15,1], [1, 5, 2], [4, 6, 8]]));
+    document.body.appendChild(input);
+}
+

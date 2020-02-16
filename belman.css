@@ -10,3 +10,10 @@ body {
     height: 250px;
     margin-right: auto;
 }
+#inputAlternative {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.readyButton {
+    margin-top: 5px;
+}
