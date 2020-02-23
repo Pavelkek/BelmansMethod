@@ -17,3 +17,11 @@ body {
 .readyButton {
     margin-top: 5px;
 }
+.table {
+    border-collapse: collapse;
+    border: 1px solid black;
+    margin-top: 15px;
+}
+td {
+    border: 1px solid black;
+}
