@@ -5,7 +5,7 @@
     "main": "main.js",
     "scripts": {
         "start": "electron .",
-        "browser": "browserify grafic.js -o graf.js"
+        "browserTable": "browserify table.js -o tableBrowser.js"
     },
     "author": "",
     "license": "ISC",

@@ -1,28 +1,31 @@
 var Chart = require('chart.js');
-drowChart = (labels, data) => {
+drowChart = (labels, data, namesGraph) => {
     let ctx = document.createElement('canvas');
     ctx.id = 'myChart';
     document.body.appendChild(ctx);
-    createDataset = (data) => {
+    createDataset = (data, namesGraph) => {
         const dataset = [];
         data.forEach((element, index) => {
             if (index % 2 === 0) {
                 dataset.push({
                     borderColor: `rgb(${index * 75}, ${index * 25}, ${index * 25})`,
                     fill: false,
-                    data: element
+                    data: element,
+                    label: namesGraph[index]
                 });
             } else if (index % 3 === 0) {
                 dataset.push({
                     borderColor: `rgb(${index * 25}, ${index * 75}, ${index * 25})`,
                     fill: false,
-                    data: element
+                    data: element,
+                    label: namesGraph[index]
                 });
             } else {
                 dataset.push({
                     borderColor: `rgb(${index * 25}, ${index * 25}, ${index * 75})`,
                     fill: false,
-                    data: element
+                    data: element,
+                    label: namesGraph[index]
             });
             }
             
@@ -33,7 +36,7 @@ drowChart = (labels, data) => {
         type: 'line',
         data: {
             labels,
-            datasets: createDataset(data),
+            datasets: createDataset(data, namesGraph),
         },
         options: {
             responsive:false,
@@ -43,11 +46,8 @@ drowChart = (labels, data) => {
         }
     });
 }
-drowButtonChart = () => {
-    input = document.createElement("input");
-    input.type = "button";
-    input.value = "Create Chart";
-    input.addEventListener( "click" , () => drowChart([1,2,3], [[2,15,1], [1, 5, 2], [4, 6, 8]]));
-    document.body.appendChild(input);
+drowButtonChart = (nameArr, valueArr, namesGraph) => {
+    drowChart(nameArr, valueArr, namesGraph);
 }
 
+module.exports.drowButtonChart = drowButtonChart;

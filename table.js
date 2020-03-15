@@ -1,3 +1,4 @@
+var importGraf = require('./grafic.js');
 lineBreak = (ancestor) => {
     let br = document.createElement('br');
     ancestor.append(br)
@@ -22,7 +23,7 @@ inputAlternative = () => {
             let input = document.createElement('input');
             input.type = 'text';
             input.id = `alternative${i + 1}`;
-            input.placeholder = `Альтернатива ${i + 1}`;
+            input.placeholder = `Критерий ${i + 1}`;
             initialDiv.append(input);
         }
         lineBreak(initialDiv);
@@ -30,7 +31,7 @@ inputAlternative = () => {
         inputCriterionButton.type = 'button';
         inputCriterionButton.classList.add('readyButton');
         inputCriterionButton.id = 'inputCriterion';
-        inputCriterionButton.value = 'Ввести критерии';
+        inputCriterionButton.value = 'Ввести альтернативы';
         inputCriterionButton.addEventListener( "click" , () => inputCriterion(alternative));
         initialDiv.append(inputCriterionButton);
     }
@@ -55,7 +56,7 @@ inputCriterion = (alternative) => {
                 let input = document.createElement('input');
                 input.type = 'text';
                 input.id = `criterion${i + 1}`;
-                input.placeholder = `Критерий ${i + 1}`;
+                input.placeholder = `Альтернатива ${i + 1}`;
                 initialDiv.append(input);
             }
             lineBreak(initialDiv);
@@ -138,6 +139,119 @@ calculateDegreeAffiliationTables = () => {
     alternativeArr.forEach((item, index) => {
         calculateDegreeAffiliationTable(index + 1);
     })
+    createResultTable();
+    let minimumsArr = calculateMinimums();
+    getRaiting(minimumsArr);
+    createDrowChartButton();
+}
+
+createDrowChartButton = () => {
+    let degreeAffiliationDiv = document.getElementById('degreeAffiliationDiv');
+    let drowChartButton = document.createElement('input');
+    drowChartButton.id = 'drowChartButton';
+    drowChartButton.type = 'button';
+    drowChartButton.value = 'Нарисовать график';
+    drowChartButton.classList.add('readyButton');
+    const valueArr = valueForGraph();
+    const nameArr = nameForGraph();
+    const nameGrapsArr = nameGraphs();
+    drowChartButton.addEventListener( "click" , () => importGraf.drowButtonChart(nameArr, valueArr, nameGrapsArr));
+    degreeAffiliationDiv.append(drowChartButton);
+}
+
+createResultTable = () => {
+    let degreeAffiliationDiv = document.getElementById('degreeAffiliationDiv');
+    let resultTable = document.createElement('table');
+    resultTable.id = `resultTable`;
+    resultTable.classList.add('table');
+    resultTable.title = 'result';
+    degreeAffiliationDiv.append(resultTable);
+    for(let i = 0; i < alternativeArr.length + 1; i++) {
+        let tr = document.createElement('tr');
+        tr.id = `${resultTable.id}_tr${i + 1}`;
+        resultTable.append(tr);
+        for(let j = 0; j < criterionArr.length + 1; j++) {
+            let td = document.createElement('td');
+            td.id = `${resultTable.id}_tr${i + 1}_td${j + 1}`;
+            tr.append(td);
+            let input = document.createElement('input');
+            input.type = 'text';
+            input.id = `${resultTable.id}_tr${i + 1}_td${j + 1}_input${j + 1}`;
+            if (i === 0 && j === 0) {
+                input.disabled = true;
+                input.value = 'Случай равновесных критериев';
+            } else if (i === 0) {
+                input.disabled = true;
+                input.value = criterionArr[j - 1];
+            } else if (j === 0) {
+                input.disabled = true;
+                input.value = alternativeArr[i - 1];
+            } else {
+                input.value = resultArr[(i - 1) * criterionArr.length + j - 1];
+            }
+            td.append(input);
+        }
+    }
+}
+
+calculateMinimums = () => {
+    const minimumsArr = [];
+    for (let i = 0; i < criterionArr.length; i++) {
+        let minimumStrValue = document.getElementById(`resultTable_tr${2}_td${2 + i}_input${2 + i}`)
+            .value;
+        for (let j = 0; j < alternativeArr.length; j++) {
+            let elementValue = document.getElementById(
+                `resultTable_tr${2 + j}_td${2 + i}_input${2 + i}`).value;
+            if (minimumStrValue > elementValue) {
+                minimumStrValue = elementValue;
+            }
+        }
+        minimumsArr.push(minimumStrValue);
+    }
+    let resultTable = document.getElementById('resultTable');
+    let tr = document.createElement('tr');
+    tr.id = `${resultTable.id}_tr${alternativeArr.length + 2}`;
+    resultTable.append(tr);
+    for(let j = 0; j < criterionArr.length + 1; j++) {
+        let td = document.createElement('td');
+        td.id = `${resultTable.id}_tr${alternativeArr.length + 2}_td${j + 1}`;
+        tr.append(td);
+        let input = document.createElement('input');
+        input.type = 'text';
+        input.id = `${resultTable.id}_tr${alternativeArr.length + 2}_td${j + 1}_input${j + 1}`;
+        if (j === 0) {
+            input.disabled = true;
+            input.value = 'Минимумы';
+        } else {
+            input.value = minimumsArr[j - 1];
+        }
+        td.append(input);
+    }
+    return minimumsArr;
+}
+
+getRaiting = (minimumsArr) => {
+    this.minimumsArr = minimumsArr.slice();
+    minimumsArr.sort((a, b) => b - a);
+    let resultTable = document.getElementById('resultTable');
+    let tr = document.createElement('tr');
+    tr.id = `${resultTable.id}_tr${alternativeArr.length + 2}`;
+    resultTable.append(tr);
+    for(let j = 0; j < criterionArr.length + 1; j++) {
+        let td = document.createElement('td');
+        td.id = `${resultTable.id}_tr${alternativeArr.length + 2}_td${j + 1}`;
+        tr.append(td);
+        let input = document.createElement('input');
+        input.type = 'text';
+        input.id = `${resultTable.id}_tr${alternativeArr.length + 2}_td${j + 1}_input${j + 1}`;
+        if (j === 0) {
+            input.disabled = true;
+            input.value = 'Рейтинг';
+        } else {
+            input.value = this.minimumsArr.indexOf(minimumsArr[j - 1]) + 1;
+        }
+        td.append(input);
+    }
 }
 
 calculateDegreeAffiliationTable = (tableNubmer) => {
@@ -147,7 +261,9 @@ calculateDegreeAffiliationTable = (tableNubmer) => {
             degreeAffiliationInCol += Number(document.getElementById(`table${tableNubmer}_tr${2 + j}_td${2 + i}_input${2 + i}`).value);
         }
         let tableDegreeAffiliationCol = document.getElementById(`tableDegreeAffiliation${tableNubmer}_tr${2}_td${1 + i}_input${1 + i}`);
-        tableDegreeAffiliationCol.value = (1 / degreeAffiliationInCol).toFixed(3);
+        degreeAffiliation = (1 / degreeAffiliationInCol).toFixed(3);
+        tableDegreeAffiliationCol.value = degreeAffiliation;
+        resultArr.push(degreeAffiliation);
     }
 }
 
@@ -268,8 +384,41 @@ addDegreeAffiliationTable = (item, index) => {
     }
 }
 
+valueForGraph = () => {
+    const valueForGraphArr = [];
+    for (let i = 0; i < criterionArr.length; i++) {
+        valueForGraphArr.push([]);
+        for (let j = 0; j < alternativeArr.length; j++) {
+            let elementValue = document.getElementById(
+                `resultTable_tr${2 + j}_td${2 + i}_input${2 + i}`).value;
+                valueForGraphArr[i].push(elementValue);
+        }
+    }
+    return valueForGraphArr;
+}
+
+nameForGraph = () => {
+    const nameForGraphArr = [];
+    for (let j = 0; j < alternativeArr.length; j++) {
+        let elementValue = document.getElementById(
+            `resultTable_tr${2 + j}_td${1}_input${1}`).value;
+            nameForGraphArr.push(elementValue);
+    }
+    return nameForGraphArr;
+}
+
+nameGraphs = () => {
+    const nameGraphsArr = [];
+    for (let j = 0; j < criterionArr.length; j++) {
+        let elementValue = document.getElementById(
+            `resultTable_tr${1}_td${2 + j}_input${2 + j}`).value;
+            nameGraphsArr.push(elementValue);
+    }
+    return nameGraphsArr;
+}
+
 let inputAlternativeButton = document.getElementById('inputAlternative');
 let alternativeArr = [];
 let criterionArr = [];
+let resultArr = [];
 inputAlternativeButton.addEventListener( "click" , () => inputAlternative());
-
