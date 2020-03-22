@@ -4,8 +4,7 @@
     "description": "",
     "main": "main.js",
     "scripts": {
-        "start": "electron .",
-        "browserTable": "browserify table.js -o tableBrowser.js"
+        "start": "browserify table.js -o tableBrowser.js && electron ."
     },
     "author": "",
     "license": "ISC",

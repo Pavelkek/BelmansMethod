@@ -1,6 +1,10 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 var Chart = require('chart.js');
 drowChart = (labels, data, namesGraph) => {
+    let ctxOld = document.getElementById('myChart');
+    if (ctxOld) {
+        ctxOld.remove();
+    }
     let ctx = document.createElement('canvas');
     ctx.id = 'myChart';
     document.body.appendChild(ctx);
@@ -20817,6 +20821,11 @@ lineBreak = (ancestor) => {
 }
 
 inputAlternative = () => {
+    notEqualFlag = false;
+    let ctxOld = document.getElementById('myChart');
+    if (ctxOld) {
+        ctxOld.remove();
+    }
     let degreeAffiliationDivOld = document.getElementById('degreeAffiliationDiv');
     if (degreeAffiliationDivOld) {
         degreeAffiliationDivOld.remove();
@@ -20918,6 +20927,52 @@ addTable = (tableNubmer) => {
     }
 }
 
+addTableNotEqual = (tableNubmer) => {
+    let initialDiv = document.getElementById('initialDiv');
+    let table = document.createElement('table');
+    table.id = `table${tableNubmer + 1}`;
+    table.classList.add('table');
+    initialDiv.append(table);
+    for(let i = 0; i <= alternativeArr.length + 1; i++) {
+        let tr = document.createElement('tr');
+        tr.id = `${table.id}_tr${i + 1}`;
+        table.append(tr);
+        for(let j = 0; j <= alternativeArr.length; j++) {
+            let td = document.createElement('td');
+            td.id = `${table.id}_tr${i + 1}_td${j + 1}`;
+            tr.append(td);
+            let input = document.createElement('input');
+            input.type = 'text';
+            input.id = `${table.id}_tr${i + 1}_td${j + 1}_input${j + 1}`;
+            if (i === 0 && j !== 0) {
+                input.value = alternativeArr[j - 1];
+                input.disabled = true;
+            } else if (j === 0 && i !== 0 && i !== alternativeArr.length + 1) {
+                input.value = alternativeArr[i - 1];
+                input.disabled = true;
+            } else if (i === j && i !== 0 && j !== 0 && i !== alternativeArr.length + 1) {
+                input.value = 1;
+                input.disabled = true;
+            } else if (i === j && j === 0) {
+                input.value = 'Парные сравнения критериев';
+                input.disabled = true;
+            } else if (j === 0 && i === alternativeArr.length + 1) {
+                input.value = 'Коэффициенты';
+                input.disabled = true;
+            }
+            td.append(input);
+        }
+    }
+}
+
+fillNotEqualTableKoef = (tableNubmer) => {
+    for(let j = 0; j < alternativeArr.length; j++) {
+        input = document.getElementById(
+            `table${tableNubmer + 1}_tr${alternativeArr.length + 2}_td${j + 2}_input${j + 2}`);
+        input.value = resultArrNotEqual[j];
+    }
+}
+
 createTables = (criterion) => {
     criterionArr = [];
     for (let i = 0; i < criterion; i++) {
@@ -20935,22 +20990,50 @@ createTables = (criterion) => {
             addTable(i);
         }
         lineBreak(initialDiv);
+        let inputСalculateWrapper = document.createElement('span');
+        let tableNotEqualWrapper = document.createElement('span');
+        initialDiv.append(inputСalculateWrapper);
+        initialDiv.append(tableNotEqualWrapper);
         let inputСalculate = document.createElement('input');
         inputСalculate.type = 'button';
         inputСalculate.classList.add('readyButton');
         inputСalculate.id = 'inputСalculate';
-        inputСalculate.value = 'Расчитать степени принадлежности';
+        inputСalculate.value = 'Рассчитать степени принадлежности';
         inputСalculate.addEventListener( "click" , () => calculateDegreeAffiliationTables());
-        initialDiv.append(inputСalculate);
+        let tableNotEqual = document.createElement('input');
+        tableNotEqual.type = 'button';
+        tableNotEqual.classList.add('readyButton');
+        tableNotEqual.id = 'tableNotEqual';
+        tableNotEqual.value = 'Случай не равновесных значений';
+        tableNotEqual.addEventListener( "click" , () => createTableNotEqual());
+        inputСalculateWrapper.append(inputСalculate);
+        tableNotEqualWrapper.append(tableNotEqual);
     }
 }
 
+createTableNotEqual = () => {
+    let notEqualTableOld = document.getElementById(`table${alternativeArr.length + 1}`);
+    if (notEqualTableOld) {
+        notEqualTableOld.remove();
+    }
+    resultArr = [];
+    resultArrNotEqual = [];
+    addTableNotEqual(alternativeArr.length);
+    notEqualFlag = true;
+}
+
 calculateDegreeAffiliationTables = () => {
+    resultArr = [];
+    resultArrNotEqual = [];
     createDegreeAffiliationTables();
     fillTables();
     alternativeArr.forEach((item, index) => {
         calculateDegreeAffiliationTable(index + 1);
     })
+    if (notEqualFlag) {
+        calculateDegreeAffiliationTableNotEqual(alternativeArr.length + 1);
+        fillNotEqualTableKoef(alternativeArr.length);
+    }
     createResultTable();
     let minimumsArr = calculateMinimums();
     getRaiting(minimumsArr);
@@ -20967,9 +21050,11 @@ createDrowChartButton = () => {
     const valueArr = valueForGraph();
     const nameArr = nameForGraph();
     const nameGrapsArr = nameGraphs();
-    console.log(nameGrapsArr);
     drowChartButton.addEventListener( "click" , () => importGraf.drowButtonChart(nameArr, valueArr, nameGrapsArr));
+    lineBreak(degreeAffiliationDiv);
     degreeAffiliationDiv.append(drowChartButton);
+    lineBreak(degreeAffiliationDiv);
+    lineBreak(degreeAffiliationDiv);
 }
 
 createResultTable = () => {
@@ -20990,17 +21075,23 @@ createResultTable = () => {
             let input = document.createElement('input');
             input.type = 'text';
             input.id = `${resultTable.id}_tr${i + 1}_td${j + 1}_input${j + 1}`;
-            if (i === 0 && j === 0) {
+            if (i === 0 && j === 0 && !notEqualFlag) {
                 input.disabled = true;
                 input.value = 'Случай равновесных критериев';
+            } else if (i === 0 && j === 0 && notEqualFlag) {
+                input.disabled = true;
+                input.value = 'Случай не равновесных критериев';
             } else if (i === 0) {
                 input.disabled = true;
                 input.value = criterionArr[j - 1];
             } else if (j === 0) {
                 input.disabled = true;
                 input.value = alternativeArr[i - 1];
-            } else {
+            } else if (!notEqualFlag){
                 input.value = resultArr[(i - 1) * criterionArr.length + j - 1];
+            } else if (notEqualFlag) {
+                input.value = (resultArr[(i - 1) * criterionArr.length + j - 1] **
+                    resultArrNotEqual[i - 1]).toFixed(3);
             }
             td.append(input);
         }
@@ -21080,10 +21171,24 @@ calculateDegreeAffiliationTable = (tableNubmer) => {
     }
 }
 
+calculateDegreeAffiliationTableNotEqual = (tableNubmer) => {
+    for (let i = 0; i < alternativeArr.length; i++) {
+        let degreeAffiliationInCol = 0;
+        for (let j = 0; j < alternativeArr.length; j++) {
+            degreeAffiliationInCol += Number(document.getElementById(`table${tableNubmer}_tr${2 + j}_td${2 + i}_input${2 + i}`).value);
+        }
+        degreeAffiliation = (1 / degreeAffiliationInCol).toFixed(3);
+        resultArrNotEqual.push(degreeAffiliation);
+    }
+}
+
 fillTables = () => {
     alternativeArr.forEach((item, index) => {
         fillTable(index + 1);
     })
+    if (notEqualFlag) {
+        fillTableNotEqual(alternativeArr.length + 1);
+    }
 }
 
 fillTable = (tableNubmer) => {
@@ -21093,6 +21198,16 @@ fillTable = (tableNubmer) => {
         fillTableByRow(tableNubmer);
     } else if (tableElementCol.value) {
         fillTableByCol(tableNubmer);
+    }
+}
+
+fillTableNotEqual = (tableNubmer) => {
+    let tableElementRow = document.getElementById(`table${tableNubmer}_tr${2}_td${3}_input${3}`);
+    let tableElementCol = document.getElementById(`table${tableNubmer}_tr${3}_td${2}_input${2}`);
+    if (tableElementRow.value) {
+        fillTableByRowNotEqual(tableNubmer);
+    } else if (tableElementCol.value) {
+        fillTableByColNotEqual(tableNubmer);
     }
 }
 
@@ -21126,6 +21241,36 @@ fillTableByRow = (tableNubmer) => {
     }
 }
 
+fillTableByRowNotEqual = (tableNubmer) => {
+    valueArr = [];
+    for (let i = 0; i < alternativeArr.length - 1; i++) {
+        let value = document.getElementById(`table${tableNubmer}_tr${2}_td${3 + i}_input${3 + i}`).value;
+        value !== '' ? valueArr.push(Number(value)) : '';
+    }
+    if (valueArr.length === alternativeArr.length - 1) {
+        for (let i = 1; i < alternativeArr.length; i++) {
+            let input = document.getElementById(`table${tableNubmer}_tr${2 + i}_td${2}_input${2}`);
+            input.value = (1 / Number(document.getElementById(`table${tableNubmer}_tr${2}_td${2 + i}_input${2 + i}`).value)).toFixed(3);
+        }
+        for (let i = 3; i <= alternativeArr.length + 1; i++) {
+            for (let j = 4; j <= alternativeArr.length + 1; j++) {
+                if (j > i) {
+                    let input = document.getElementById(`table${tableNubmer}_tr${i}_td${j}_input${j}`);
+                    input.value = (valueArr[j - 3] / valueArr[i - 3]).toFixed(3);
+                }
+            }
+        }
+        for (let i = 4; i <= alternativeArr.length + 1; i++) {
+            for (let j = 3; j <= alternativeArr.length + 1; j++) {
+                if (j < i) {
+                    let input = document.getElementById(`table${tableNubmer}_tr${i}_td${j}_input${j}`);
+                    input.value = (1 / Number(document.getElementById(`table${tableNubmer}_tr${j}_td${i}_input${i}`).value)).toFixed(3);
+                }
+            }
+        }
+    }
+}
+
 fillTableByCol = (tableNubmer) => {
     valueArr = [];
     for (let i = 0; i < criterionArr.length - 1; i++) {
@@ -21147,6 +21292,36 @@ fillTableByCol = (tableNubmer) => {
         }
         for (let i = 3; i <= criterionArr.length + 1; i++) {
             for (let j = 4; j <= criterionArr.length + 1; j++) {
+                if (j > i) {
+                    let input = document.getElementById(`table${tableNubmer}_tr${i}_td${j}_input${j}`);
+                    input.value = (1 / Number(document.getElementById(`table${tableNubmer}_tr${j}_td${i}_input${i}`).value)).toFixed(3);
+                }
+            }
+        } 
+    }
+}
+
+fillTableByColNotEqual = (tableNubmer) => {
+    valueArr = [];
+    for (let i = 0; i < alternativeArr.length - 1; i++) {
+        let value = document.getElementById(`table${tableNubmer}_tr${3 + i}_td${2}_input${2}`).value;
+        value !== '' ? valueArr.push(Number(value)) : '';
+    }
+    if (valueArr.length === alternativeArr.length - 1) {
+        for (let i = 1; i < alternativeArr.length; i++) {
+            let input = document.getElementById(`table${tableNubmer}_tr${2}_td${2 + i}_input${2 + i}`);
+            input.value = (1 / Number(document.getElementById(`table${tableNubmer}_tr${2 + i}_td${2}_input${2}`).value)).toFixed(3);
+        }
+        for (let i = 4; i <= alternativeArr.length + 1; i++) {
+            for (let j = 3; j <= alternativeArr.length + 1; j++) {
+                if (j < i) {
+                    let input = document.getElementById(`table${tableNubmer}_tr${i}_td${j}_input${j}`);
+                    input.value = (valueArr[i - 3] / valueArr[j - 3]).toFixed(3);
+                }
+            }
+        }
+        for (let i = 3; i <= alternativeArr.length + 1; i++) {
+            for (let j = 4; j <= alternativeArr.length + 1; j++) {
                 if (j > i) {
                     let input = document.getElementById(`table${tableNubmer}_tr${i}_td${j}_input${j}`);
                     input.value = (1 / Number(document.getElementById(`table${tableNubmer}_tr${j}_td${i}_input${i}`).value)).toFixed(3);
@@ -21234,6 +21409,8 @@ let inputAlternativeButton = document.getElementById('inputAlternative');
 let alternativeArr = [];
 let criterionArr = [];
 let resultArr = [];
+let notEqualFlag = false;
+let resultArrNotEqual = [];
 inputAlternativeButton.addEventListener( "click" , () => inputAlternative());
 
 },{"./grafic.js":1}]},{},[4]);

@@ -1,5 +1,9 @@
 var Chart = require('chart.js');
 drowChart = (labels, data, namesGraph) => {
+    let ctxOld = document.getElementById('myChart');
+    if (ctxOld) {
+        ctxOld.remove();
+    }
     let ctx = document.createElement('canvas');
     ctx.id = 'myChart';
     document.body.appendChild(ctx);
